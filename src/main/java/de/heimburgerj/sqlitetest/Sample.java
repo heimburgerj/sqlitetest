@@ -6,21 +6,16 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
 
 import org.postgresql.Driver;
 
 public class Sample {
     public static void main(String[] args) {
         Connection connection = null;
-        try {
-            Class<org.postgresql.Driver> driverType = (Class<Driver>) Class.forName("org.postgresql.Driver");
-            org.postgresql.Driver driver = driverType.getConstructor().newInstance();
-            System.out.println("loaded postgresql driver successfully : " + driver.getClass() + " "
-                    + driver.getMajorVersion() + "." + driver.getMinorVersion());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
-        }
+        List<String> drivers = Arrays.asList("org.postgresql.Driver", "oracle.jdbc.driver.OracleDriver");
+        drivers.forEach(Sample::testDriver);
         try {
             // create a database connection
             connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
@@ -49,6 +44,20 @@ public class Sample {
                 // connection close failed.
                 System.err.println(e.getMessage());
             }
+        }
+    }
+
+    private static void testDriver(String driverClassName) {
+        try {
+
+            Class<?> driverType = Class.forName(driverClassName);
+            java.sql.Driver driver = (java.sql.Driver) driverType.getConstructor().newInstance();
+            System.out.println("Loaded driver successfully : " + driver.getClass() + " "
+                    + driver.getMajorVersion() + "." + driver.getMinorVersion());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            System.err.println(
+                    "Failed to load driver " + driverClassName + " : " + e.getClass() + " (" + e.getMessage() + ")");
         }
     }
 }
