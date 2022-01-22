@@ -1,18 +1,24 @@
 package de.heimburgerj.sqlitetest;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.postgresql.Driver;
+
 public class Sample {
     public static void main(String[] args) {
         Connection connection = null;
         try {
-            Class.forName("org.postgresql.Driver");
-            System.out.println("loaded postgresql driver successfully");
-        } catch (ClassNotFoundException e) {
+            Class<org.postgresql.Driver> driverType = (Class<Driver>) Class.forName("org.postgresql.Driver");
+            org.postgresql.Driver driver = driverType.getConstructor().newInstance();
+            System.out.println("loaded postgresql driver successfully : " + driver.getClass() + " "
+                    + driver.getMajorVersion() + "." + driver.getMinorVersion());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
         try {
