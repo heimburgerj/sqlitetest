@@ -12,10 +12,16 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class Sample {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Sample.class);
+
     public static void main(String[] args) {
         Connection connection = null;
         List<String> drivers = Arrays.asList("org.postgresql.Driver", "oracle.jdbc.driver.OracleDriver");
@@ -42,7 +48,7 @@ public class Sample {
                     file.createNewFile();
                 ObjectMapper om = new ObjectMapper(new YAMLFactory());
                 om.writeValue(file, person);
-                System.out.println("Exported person " + person + " to file " + file + ".");
+                LOGGER.info("Exported person " + person + " to file " + file + ".");
             }
         } catch (SQLException | IOException e) {
             // if the error message is "out of memory",
