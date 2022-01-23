@@ -1,6 +1,9 @@
 package de.heimburgerj.sqlitetest;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,7 +12,8 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
-import org.postgresql.Driver;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class Sample {
     public static void main(String[] args) {
@@ -29,10 +33,18 @@ public class Sample {
             ResultSet rs = statement.executeQuery("select * from person");
             while (rs.next()) {
                 // read the result set
-                System.out.println("name = " + rs.getString("name"));
-                System.out.println("id = " + rs.getInt("id"));
+                Person person = new Person(rs.getInt("id"), rs.getString("name"));
+                System.out.println("name = " + person.name());
+                System.out.println("id = " + person.id());
+                File file = new File("src/test/resources/temp/out.yaml");
+                Files.createDirectories(file.getParentFile().toPath());
+                if (!file.exists())
+                    file.createNewFile();
+                ObjectMapper om = new ObjectMapper(new YAMLFactory());
+                om.writeValue(file, person);
+                System.out.println("Exported person " + person + " to file " + file + ".");
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             // if the error message is "out of memory",
             // it probably means no database file is found
             System.err.println(e.getMessage());
@@ -52,8 +64,8 @@ public class Sample {
 
             Class<?> driverType = Class.forName(driverClassName);
             java.sql.Driver driver = (java.sql.Driver) driverType.getConstructor().newInstance();
-            System.out.println("Loaded driver successfully : " + driver.getClass() + " "
-                    + driver.getMajorVersion() + "." + driver.getMinorVersion());
+            System.out.println("Loaded driver successfully : " + driver.getClass() + " " + driver.getMajorVersion()
+                    + "." + driver.getMinorVersion());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             System.err.println(
